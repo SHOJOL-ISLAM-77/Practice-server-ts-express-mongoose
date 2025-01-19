@@ -5,6 +5,7 @@ import express from "express";
 import helmet from "helmet";
 import { getSalesStats } from "./controllers/selesStats.controller";
 import router from "./routes";
+import globalErrorHandler from "./middlewares/globalErrorHandler";
 
 const app: Application = express();
 
@@ -23,6 +24,7 @@ app.use(helmet());
 
 app.get("/", getSalesStats);
 app.use("/api/v1", router);
+app.use(globalErrorHandler)
 
 app.all("*", (req: Request, res: Response) => {
   res.status(404).send("Route not found");
