@@ -1,24 +1,29 @@
 import bcrypt from "bcryptjs";
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import Users from "../models/users.model";
-import { loginUser, registerUser, updateLastLogin } from "../services/auth.service";
+import {
+  loginUser,
+  registerUser,
+  updateLastLogin,
+} from "../services/auth.service";
+import catchAsync from "../utils/catchAsync";
 
-export const loginController = async (req: Request, res: Response) => {
-  try {
+export const loginController = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
     const { email, password } = req.body;
     const user = await Users.findOne({ email });
 
     if (!user) {
-      res.status(404).json({
-        success: false,
+      next({
         message: "User not found",
+        statusCode: 404,
       });
     } else {
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
-        res.status(401).json({
-          success: false,
+        next({
           message: "Invalid password",
+          statusCode: 401,
         });
       } else {
         const result = await loginUser(user);
@@ -31,29 +36,15 @@ export const loginController = async (req: Request, res: Response) => {
         });
       }
     }
-  } catch (err) {
-    const error = err as Error;
-    res.status(500).json({
-      success: false,
-      message: error?.message || "Failed to login",
-      error: error,
-    });
   }
-};
+);
 
-export const registerController = async (req: Request, res: Response) => {
-  try {
+export const registerController = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
     const result = await registerUser(req.body);
     res.status(200).json({
       success: true,
       data: result,
     });
-  } catch (err) {
-    const error = err as Error;
-    res.status(500).json({
-      success: false,
-      message: error?.message || "Failed to register",
-      error: error,
-    });
   }
-};
+);
