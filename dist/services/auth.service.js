@@ -18,8 +18,23 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const config_1 = __importDefault(require("../config"));
 const users_model_1 = __importDefault(require("../models/users.model"));
 const JWTUtils_1 = require("../utils/JWTUtils");
+// export const loginUser = async (user: User) => {
+//   const token = signToken({ email: user.email, name: user.name, id: user._id });
+//   return {
+//     user: {
+//       name: user.name,
+//       email: user.email,
+//       profileUrl: user.profileUrl,
+//       contactNo: user.contactNo,
+//     },
+//     token,
+//   };
+// };
 const loginUser = (user) => __awaiter(void 0, void 0, void 0, function* () {
-    const token = (0, JWTUtils_1.signToken)({ email: user.email, name: user.name, id: user._id });
+    const accessToken = (0, JWTUtils_1.signToken)({ email: user.email, name: user.name, id: user._id });
+    const refreshToken = (0, JWTUtils_1.signToken)({ email: user.email, id: user._id }, "refresh");
+    // Store the refresh token securely
+    yield users_model_1.default.findByIdAndUpdate(user._id, { refreshToken });
     return {
         user: {
             name: user.name,
@@ -27,7 +42,8 @@ const loginUser = (user) => __awaiter(void 0, void 0, void 0, function* () {
             profileUrl: user.profileUrl,
             contactNo: user.contactNo,
         },
-        token,
+        accessToken,
+        refreshToken,
     };
 });
 exports.loginUser = loginUser;
@@ -36,7 +52,7 @@ const registerUser = (userData) => __awaiter(void 0, void 0, void 0, function* (
     if (!result) {
         throw new Error("Failed to create user");
     }
-    const token = (0, JWTUtils_1.signToken)({ email: result.email, name: result.name, id: result._id });
+    const token = yield (0, JWTUtils_1.signToken)({ email: result.email, name: result.name, id: result._id });
     const user = {
         name: result.name,
         email: result.email,

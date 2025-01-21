@@ -14,6 +14,10 @@ const UserSchema = new mongoose.Schema<User>({
     type: String,
     required: [true, "Please enter your email"],
     unique: true,
+    validate: {
+      validator: (value: string) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value),
+      message: "Invalid email address",
+    },
   },
   password: {
     type: String,
@@ -26,6 +30,10 @@ const UserSchema = new mongoose.Schema<User>({
   contactNo: {
     type: String,
     required: [true, "Please enter your contact number"],
+    validate: {
+      validator: (value) => /^(\+?\d{1,3}[-.\s]?)?(\(?\d{2,4}\)?[-.\s]?)?\d{6,10}$/.test(value),
+      message: "Invalid contact Number",
+    },
   },
   createdAt: {
     type: Date,

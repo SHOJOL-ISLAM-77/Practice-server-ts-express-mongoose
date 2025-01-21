@@ -1,13 +1,22 @@
-import { NextFunction, Request, Response } from "express";
+import { ErrorRequestHandler, NextFunction } from "express";
+import validationError from "../utils/validationError";
 
-const globalErrorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
-  console.log(err);
-  const statusCode = err.statusCode || 500;
-  const message = err.message || "Internal Server Error";
+const globalErrorHandler: ErrorRequestHandler = (err, req, res, next: NextFunction) => {
+  let statusCode = err.statusCode || 500;
+  let message = err.message || "Internal Server Error";
+  let error = err;
+
+  if (err.name === "ValidationError") {
+    const customErrors = validationError(err);
+    message = customErrors.message;
+    error = customErrors.err;
+  }
+
   res.status(statusCode).json({
+    status: statusCode,
     success: false,
     message,
-    error: err,
+    error,
   });
 };
 

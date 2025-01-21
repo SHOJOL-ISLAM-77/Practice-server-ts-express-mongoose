@@ -7,6 +7,17 @@ const app_1 = __importDefault(require("./app"));
 const config_1 = __importDefault(require("./config"));
 const DB_1 = __importDefault(require("./DB/DB"));
 (0, DB_1.default)();
-app_1.default.listen(config_1.default.port, () => {
+const server = app_1.default.listen(config_1.default.port, () => {
     console.log("Server is running on port " + config_1.default.port);
+});
+process.on("uncaughtException", () => {
+    process.exit(1);
+});
+process.on("unhandledRejection", () => {
+    if (server) {
+        server.close(() => {
+            process.exit(1);
+        });
+    }
+    process.exit(1);
 });

@@ -29,6 +29,9 @@ const getAllStudentsDB = (_a) => __awaiter(void 0, [_a], void 0, function* ({ pe
 exports.getAllStudentsDB = getAllStudentsDB;
 const getSingleStudentDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const student = yield student_model_1.default.findById(id);
+    if (student === null) {
+        throw new Error("Student Not Found");
+    }
     return student;
 });
 exports.getSingleStudentDB = getSingleStudentDB;

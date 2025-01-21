@@ -5,8 +5,26 @@ import type { User } from "../interfaces/users.interfaces";
 import Users from "../models/users.model";
 import { signToken } from "../utils/JWTUtils";
 
+// export const loginUser = async (user: User) => {
+//   const token = signToken({ email: user.email, name: user.name, id: user._id });
+
+//   return {
+//     user: {
+//       name: user.name,
+//       email: user.email,
+//       profileUrl: user.profileUrl,
+//       contactNo: user.contactNo,
+//     },
+//     token,
+//   };
+// };
+
 export const loginUser = async (user: User) => {
-  const token = signToken({ email: user.email, name: user.name, id: user._id });
+  const accessToken = signToken({ email: user.email, name: user.name, id: user._id });
+  const refreshToken = signToken({ email: user.email, id: user._id }, "refresh");
+
+  // Store the refresh token securely
+  await Users.findByIdAndUpdate(user._id, { refreshToken });
 
   return {
     user: {
@@ -15,16 +33,18 @@ export const loginUser = async (user: User) => {
       profileUrl: user.profileUrl,
       contactNo: user.contactNo,
     },
-    token,
+    accessToken,
+    refreshToken,
   };
 };
+
 export const registerUser = async (userData: User) => {
   const result = await createUser(userData);
 
   if (!result) {
     throw new Error("Failed to create user");
   }
-  const token = signToken({ email: result.email, name: result.name, id: result._id });
+  const token = await signToken({ email: result.email, name: result.name, id: result._id });
 
   const user = {
     name: result.name,

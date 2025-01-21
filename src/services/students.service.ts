@@ -16,6 +16,9 @@ export const getAllStudentsDB = async ({ perPage = 10, page = 1 }) => {
 
 export const getSingleStudentDB = async (id: string) => {
   const student = await Student.findById(id);
+  if (student === null) {
+    throw new Error("Student Not Found");
+  }
   return student;
 };
 
